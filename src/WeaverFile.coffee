@@ -4,7 +4,8 @@ Error            = require('./Error')
 WeaverError      = require('./WeaverError')
 WeaverSystemNode = require('./WeaverSystemNode')
 readFile         = require('fs-readfile-promise')
-
+fs               = require('fs')
+request          = require('request')
 
 class WeaverFile extends Weaver.SystemNode
 
@@ -15,21 +16,57 @@ class WeaverFile extends Weaver.SystemNode
     super(nodeId, WeaverFile)
 
   saveFile: (path, fileName, project) ->
-    coreManager = Weaver.getCoreManager()
-    readFile(path)
-    .then((file) ->
-      fileBody = {
-        buffer: file
-        target: project
-        fileName
-      }
-      coreManager.sendFile(fileBody)
-    ).catch((err) ->
-      if err.code is 'ENOENT'
-        Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR,"The file #{fileName} for upload at #{project} does not exits")
-      else
-        Promise.reject(Error WeaverError.OTHER_CAUSE,"Something went wrong trying to read the local file #{fileName}")
-    )
+    console.log path
+    try
+
+
+      # req = request.post('http://localhost:9487/upload', (err, resp, body) ->
+      # if (err)
+      #   console.log('Error!');
+      # else
+      #   console.log('URL: ' + body);
+      # )
+      # console.log req
+      #
+      #
+
+
+      request.post({
+        url: 'http://localhost:9487/upload'
+        form: {
+          # file: fs.createReadStream(path)
+          file: fs.createReadStream('/Users/char/Downloads/mouser.pdf')
+          accessToken: 'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…'
+          target: project
+          fileName: fileName
+        }
+        },(err, httpResponse,body) ->
+          console.log '=^^=|_'
+          if err
+            Promise.reject(err)
+          else
+            Promise.resolve(httpResponse)
+        )
+    catch error
+      Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR,"The file #{fileName} for upload at #{project} does not exits")
+
+    # coreManager = Weaver.getCoreManager()
+
+    # readFile(path)
+    # .then((file) ->
+    #   fileBody = {
+    #     buffer: file
+    #     target: project
+    #     fileName
+    #   }
+    #   coreManager.sendFile(fileBody)
+    # ).catch((err) ->
+    #   if err.code is 'ENOENT'
+    #     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR,"The file #{fileName} for upload at #{project} does not exits")
+    #   else
+    #     Promise.reject(Error WeaverError.OTHER_CAUSE,"Something went wrong trying to read the local file #{fileName}")
+    # )
+
   getFile: (path, fileName, project) ->
     coreManager = Weaver.getCoreManager()
     file = {
