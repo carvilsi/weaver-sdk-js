@@ -18,50 +18,12 @@ class WeaverFile extends Weaver.SystemNode
 
   saveFile: (path, fileName, project) ->
     coreManager = Weaver.getCoreManager()
-
     formData =
       file: fs.createReadStream(path)
-      accessToken:'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…'
+      accessToken:'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…' #TODO: put this as parameter when the auth PR will be merged
       target:project
       fileName:fileName
-
     coreManager.uploadFile(formData)
-    # WORKING CODE -----------
-    # new Promise((resolve, reject) =>
-    #   formData =
-    #     file: fs.createReadStream(path)
-    #     accessToken:'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…'
-    #     target:project
-    #     fileName:fileName
-    #
-    #   console.log formData
-    #   request.post({url:'http://localhost:9487/upload', formData: formData}, (err, httpResponse, body) ->
-    #     console.log '=^^=|_'
-    #     if err
-    #       console.log err
-    #       reject(err)
-    #     else
-    #       console.log httpResponse
-    #       resolve(httpResponse)
-    #   )
-    # )
-
-    # coreManager = Weaver.getCoreManager()
-
-    # readFile(path)
-    # .then((file) ->
-    #   fileBody = {
-    #     buffer: file
-    #     target: project
-    #     fileName
-    #   }
-    #   coreManager.sendFile(fileBody)
-    # ).catch((err) ->
-    #   if err.code is 'ENOENT'
-    #     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR,"The file #{fileName} for upload at #{project} does not exits")
-    #   else
-    #     Promise.reject(Error WeaverError.OTHER_CAUSE,"Something went wrong trying to read the local file #{fileName}")
-    # )
 
   getFile: (path, fileName, project) ->
     coreManager = Weaver.getCoreManager()

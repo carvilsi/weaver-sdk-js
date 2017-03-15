@@ -7,7 +7,8 @@ SocketController = require('./SocketController')
 LocalController  = require('./LocalController')
 loki             = require('lokijs')
 request          = require('request')
-
+Error            = require('./Error')
+WeaverError      = require('./WeaverError')
 
 class CoreManager
 
@@ -149,13 +150,13 @@ class CoreManager
   uploadFile: (formData) ->
     new Promise((resolve, reject) =>
       request.post({url:"#{@endpoint}/upload", formData: formData}, (err, httpResponse, body) ->
-        console.log '=^^=|_'
         if err
-          console.log err
-          reject(err)
+          if err.code is 'ENOENT'
+            reject(Error WeaverError.FILE_NOT_EXISTS_ERROR,"The file #{err.path} does not exits")
+          else
+            reject(Error WeaverError.OTHER_CAUSE,"Unknown error")
         else
-          console.log httpResponse
-          resolve(httpResponse)
+          resolve(httpResponse.body)
       )
     )
 
