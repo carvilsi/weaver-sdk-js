@@ -8,10 +8,14 @@ describe 'WeaverFile test', ->
   tmpDir = path.join(__dirname,"../tmp")
 
   it 'should create a new file', ->
-    this.timeout(5000)
+    this.timeout(8000)
     weaverFile = new Weaver.File()
     fileTemp = path.join(__dirname,'../icon.png')
     weaverFile.saveFile('/Users/char/Downloads/mouser.pdf', 'weaverIcon.png', 'area51')
+    .then((res) ->
+      console.log res
+    )
+
     # .then((res) ->
     # # weaverFile.saveFile(fileTemp, 'weaverIcon.png', 'area51').then((res) ->
     #   console.log res

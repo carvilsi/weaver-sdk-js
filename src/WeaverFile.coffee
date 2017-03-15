@@ -5,7 +5,8 @@ WeaverError      = require('./WeaverError')
 WeaverSystemNode = require('./WeaverSystemNode')
 readFile         = require('fs-readfile-promise')
 fs               = require('fs')
-request          = require('request')
+
+
 
 class WeaverFile extends Weaver.SystemNode
 
@@ -16,39 +17,34 @@ class WeaverFile extends Weaver.SystemNode
     super(nodeId, WeaverFile)
 
   saveFile: (path, fileName, project) ->
-    console.log path
-    try
+    coreManager = Weaver.getCoreManager()
 
+    formData =
+      file: fs.createReadStream(path)
+      accessToken:'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…'
+      target:project
+      fileName:fileName
 
-      # req = request.post('http://localhost:9487/upload', (err, resp, body) ->
-      # if (err)
-      #   console.log('Error!');
-      # else
-      #   console.log('URL: ' + body);
-      # )
-      # console.log req
-      #
-      #
-
-
-      request.post({
-        url: 'http://localhost:9487/upload'
-        form: {
-          # file: fs.createReadStream(path)
-          file: fs.createReadStream('/Users/char/Downloads/mouser.pdf')
-          accessToken: 'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…'
-          target: project
-          fileName: fileName
-        }
-        },(err, httpResponse,body) ->
-          console.log '=^^=|_'
-          if err
-            Promise.reject(err)
-          else
-            Promise.resolve(httpResponse)
-        )
-    catch error
-      Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR,"The file #{fileName} for upload at #{project} does not exits")
+    coreManager.uploadFile(formData)
+    # WORKING CODE -----------
+    # new Promise((resolve, reject) =>
+    #   formData =
+    #     file: fs.createReadStream(path)
+    #     accessToken:'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1…'
+    #     target:project
+    #     fileName:fileName
+    #
+    #   console.log formData
+    #   request.post({url:'http://localhost:9487/upload', formData: formData}, (err, httpResponse, body) ->
+    #     console.log '=^^=|_'
+    #     if err
+    #       console.log err
+    #       reject(err)
+    #     else
+    #       console.log httpResponse
+    #       resolve(httpResponse)
+    #   )
+    # )
 
     # coreManager = Weaver.getCoreManager()
 

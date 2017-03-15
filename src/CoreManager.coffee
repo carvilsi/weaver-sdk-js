@@ -6,6 +6,8 @@ Promise          = require('bluebird')
 SocketController = require('./SocketController')
 LocalController  = require('./LocalController')
 loki             = require('lokijs')
+request          = require('request')
+
 
 class CoreManager
 
@@ -15,6 +17,7 @@ class CoreManager
     @currentProject = null
 
   connect: (endpoint) ->
+    @endpoint = endpoint
     @commController = new SocketController(endpoint)
     @commController.connect()
 
@@ -142,6 +145,19 @@ class CoreManager
 
   deleteFileByID: (file) ->
     @commController.POST('file.deleteByID',file)
+
+  uploadFile: (formData) ->
+    new Promise((resolve, reject) =>
+      request.post({url:"#{@endpoint}/upload", formData: formData}, (err, httpResponse, body) ->
+        console.log '=^^=|_'
+        if err
+          console.log err
+          reject(err)
+        else
+          console.log httpResponse
+          resolve(httpResponse)
+      )
+    )
 
   GET: (path, payload, target) ->
     @REQUEST("GET", path, payload, target)
