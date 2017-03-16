@@ -8,7 +8,7 @@ describe 'WeaverFile test', ->
   tmpDir = path.join(__dirname,"../tmp")
 
   it 'should create a new file', ->
-    this.timeout(8000)
+    this.timeout(10000) # This timeout is high cose the 1st time minio takes more time (extra time creating a bucket)
     weaverFile = new Weaver.File()
     fileTemp = path.join(__dirname,'../icon.png')
     weaverFile.saveFile(fileTemp, 'weaverIcon.png', 'area51',  'eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1')
