@@ -38,7 +38,7 @@ describe 'WeaverUser Test', ->
   it 'should sign in an admin using a token', ->
     authToken = null;
     # Sign in to obtain a token
-    weaver.signInWithUsername('admin', 'admin').then((user) ->
+    weaver.signInWithUsername('admin', 'adminer').then((user) ->
       authToken = user.authToken
       # Sign out again
       weaver.signOut()

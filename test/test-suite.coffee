@@ -10,7 +10,7 @@ before ->
   weaver.connect(WEAVER_ENDPOINT,options).then(->
     weaver.wipe()
   ).then(->
-    weaver.signInWithUsername('admin', 'admin')
+    weaver.signInWithUsername('admin', 'adminer')
   ).then(->
     project = new Weaver.Project()
     project.create()
@@ -26,7 +26,7 @@ beforeEach ->
   weaver.currentProject().wipe().then(->
     weaver.getCoreManager().wipeUsers()
   ).then(->
-    weaver.signInWithUsername('admin', 'admin')
+    weaver.signInWithUsername('admin', 'adminer')
   )
 
 module.exports = weaver
