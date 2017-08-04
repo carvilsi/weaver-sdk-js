@@ -205,6 +205,47 @@ describe 'WeaverUser Test', ->
       assert.isTrue(err.toString().startsWith("Error: Username not valid"))
     )
 
+  it 'should not mess up with multiple singInWithToken for different users', ->
+    userFoo = new Weaver.User("foo", "foo123", "foo@not.com")
+    fooToken = null
+    userFoo.signUp()
+    .then((user) ->
+      assert.equal(user.id(), weaver.currentUser().id())
+      assert.equal(user.username,"foo")
+      assert.isTrue(user.authToken?)
+      weaver.signOut()
+    ).then( ->
+      expect(weaver.currentUser()).to.be.undefined
+      userBar = new Weaver.User("bar", "bar123", "bar@not.com")
+      userBar.signUp()
+    ).then((user) ->
+      assert.equal(user.id(), weaver.currentUser().id())
+      assert.equal(user.username,"bar")
+      assert.isTrue(user.authToken?)
+      weaver.signInWithUsername("foo","foo123")
+    ).then((login) ->
+      assert.equal(login.id(), weaver.currentUser().id())
+      fooToken = login.authToken
+      weaver.signOut()
+    ).then( =>
+      weaver.signInWithUsername("bar","bar123")
+    ).then((barLogin) =>
+      console.log '=^^=|_'
+      console.log fooToken
+      assert.equal(barLogin.id(), weaver.currentUser().id())
+      barToken = barLogin.authToken
+      weaver.signInWithToken(fooToken)
+    ).then((fooLogin) =>
+      console.log weaver.currentUser()
+      console.log fooLogin
+    )
+
+
+
+
+
+
+
   it 'should list all users', ->
     Promise.map([
       new Weaver.User('abcdef', '123456', 'ghe')
