@@ -147,7 +147,7 @@ describe 'WeaverQuery Test', ->
         checkNodeInResult(nodes, 'b')
         checkNodeInResult(nodes, 'c')
       )
-      
+
     it 'should do relation hasNoRelationOut', ->
       new Weaver.Query()
       .hasNoRelationOut("link", b)
@@ -166,7 +166,7 @@ describe 'WeaverQuery Test', ->
         expect(nodes.length).to.equal(3)
         checkNodeInResult(nodes, 'b')
       )
-        
+
     it 'should do relation hasNoRelationIn', ->
       new Weaver.Query()
       .noRelations()
@@ -318,7 +318,7 @@ describe 'WeaverQuery Test', ->
 
     beforeEach ->
       wipeCurrentProject()
-      
+
     it 'should allow "or" in objects for specific hasRelationOut', ->
       a = new Weaver.Node('a')
       b = new Weaver.Node('b')
@@ -421,7 +421,7 @@ describe 'WeaverQuery Test', ->
       )
 
     it 'should do relation hasRelationOut with subclasses', ->
-      
+
       class SpecialNodeA extends Weaver.Node
 
       a = new Weaver.Node("a")
@@ -807,7 +807,7 @@ describe 'WeaverQuery Test', ->
           expect(attrs).to.not.have.property('skip')
         )
       )
-    
+
   # From this point on, no more beforeEach
 
   it 'should deny any other user than root to execute a native query', ->
@@ -834,7 +834,7 @@ describe 'WeaverQuery Test', ->
       expect(err).to.have.property('message').match(/Permission denied/)
     )
 
-    
+
   it.skip 'should load in some secondary nodes with "selectIn"', ->
     a = new Weaver.Node('a')
     b = new Weaver.Node('b')
@@ -1011,4 +1011,18 @@ describe 'WeaverQuery Test', ->
     ).then(->
       Weaver.Node.load('someNode')
     )
-    
+
+  it 'should sanitize weaver query', ->
+
+    new Weaver.Query()
+    .contains("name ' ","one 'two ' three")
+    .hasRelationOut("' link")
+    .selectOut("test '; TRUNCATE TABLE `trackerdb`; --")
+    .selectRecursiveOut("test '; TRUNCATE TABLE `trackerdb`; --")
+    .hasRelationIn("'link ' ")
+    .select("'link ' ","' *'")
+    .restrict("'a")
+    .find()
+    .then((nodes)->
+      expect(nodes.length).to.equal(0)
+    )
