@@ -151,7 +151,7 @@ class WeaverNode
 
 
   # Update attribute by incrementing the value, the result depends on concurrent requests, so check the result
-  increment: (field, value, project) ->
+  increment: (field, value) ->
 
     if not @attributes[field]?
       throw new Error("There is no field " + field + " to increment")
@@ -265,12 +265,12 @@ class WeaverNode
 
 
   # Save node and all values / relations and relation objects to server
-  save: (project) ->
+  save: ->
     cm = Weaver.getCoreManager()
     writes = @_collectPendingWrites()
 
     cm.enqueue(=>
-      cm.executeOperations((_.omit(i, "__pendingOpNode") for i in writes), project).then(=>
+      cm.executeOperations((_.omit(i, "__pendingOpNode") for i in writes)).then(=>
         @_setStored()
         @
       ).catch((e) =>
@@ -284,11 +284,11 @@ class WeaverNode
       )
     )
 
-  @batchSave: (array, project) ->
+  @batchSave: (array) ->
     cm = Weaver.getCoreManager()
     writes = [].concat.apply([], (i._collectPendingWrites() for i in array))
     cm.enqueue(=>
-      cm.executeOperations((_.omit(i, "__pendingOpNode") for i in writes), project).then(->
+      cm.executeOperations((_.omit(i, "__pendingOpNode") for i in writes)).then(->
         i.__pendingOpNode._setStored() for i in writes when i.__pendingOpNode._setStored?
         Promise.resolve()
       ).catch((e) =>
@@ -304,11 +304,11 @@ class WeaverNode
     )
 
   # Removes node
-  destroy: (project) ->
+  destroy: ->
     cm = Weaver.getCoreManager()
     cm.enqueue( =>
       if @nodeId?
-        cm.executeOperations([Operation.Node(@).removeNode()], project).then(=>
+        cm.executeOperations([Operation.Node(@).removeNode()]).then(=>
           delete @[key] for key of @
           undefined
         )

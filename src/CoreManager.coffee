@@ -66,11 +66,8 @@ class CoreManager
     )
 
 
-  executeOperations: (operations, target) ->
-    @POST('write', {operations}, target)
-
-#  serverVersion: ->
-#    @POST('application.version')
+  executeOperations: (operations) ->
+    @POST('write', {operations})
 
   cloneNode: (sourceId, targetId, relationsToTraverse) ->
     @POST('node.clone', { sourceId, targetId, relationsToTraverse})
