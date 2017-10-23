@@ -1014,15 +1014,31 @@ describe 'WeaverQuery Test', ->
 
   it 'should sanitize weaver query', ->
 
-    new Weaver.Query()
-    .contains("name ' ","one 'two ' three")
-    .hasRelationOut("' link")
-    .selectOut("test '; TRUNCATE TABLE `trackerdb`; --")
-    .selectRecursiveOut("test '; TRUNCATE TABLE `trackerdb`; --")
-    .hasRelationIn("'link ' ")
-    .select("'link ' ","' *'")
-    .restrict("'a")
-    .find()
-    .then((nodes)->
+    a = new Weaver.Node()
+    a.set('name',"test")
+    a.save().then( ->
+      new Weaver.Query()
+      .contains("name","test'y")
+      .hasRelationOut("' link")
+      .selectOut("test '; TRUNCATE TABLE `trackerdb`; --")
+      .selectRecursiveOut("test '; TRUNCATE TABLE `trackerdb`; --")
+      .hasRelationIn("'link ' ")
+      .select("'link ' ","' *'")
+      .restrict("'a")
+      .find()
+    ).then((nodes)->
       expect(nodes.length).to.equal(0)
+    )
+
+  it 'should sanitize weaver query allow to search values with escapable character \'', ->
+
+    a = new Weaver.Node()
+    a.set('name',"G'Kar")
+    a.save().then( ->
+      new Weaver.Query()
+      .contains("name","G'K")
+      .find()
+    ).then((nodes)->
+      expect(nodes.length).to.equal(1)
+      expect(nodes[0].get('name')).to.equal("G'Kar")
     )
