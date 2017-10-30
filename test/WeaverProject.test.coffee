@@ -137,7 +137,10 @@ describe 'WeaverProject Test', ->
     weaver.signOut().then(->weaver.coreManager.readyProject(weaver.currentProject().projectId)).should.be.rejected
 
   it 'should allow checking project readyness for admin' , ->
-    weaver.coreManager.readyProject(weaver.currentProject().projectId).should.eventually.eql({ready: true})
+    weaver.coreManager.readyProject(weaver.currentProject().projectId)
+    .then((res) ->
+      assert.equal(res.ready,true)
+    )
 
   it 'should allow checking project readyness for regular users with access' , ->
     testUser = new Weaver.User('testuser', 'testpassword', 'test@example.com')
@@ -151,7 +154,9 @@ describe 'WeaverProject Test', ->
       weaver.signInWithUsername('testuser', 'testpassword')
     ).then(->
       weaver.coreManager.readyProject(weaver.currentProject().projectId)
-    ).should.eventually.eql({ready: true})
+    ).then((res) ->
+      assert.equal(res.ready,true)
+    )
 
 
   it 'should not allow unauthorized snapshots', ->
