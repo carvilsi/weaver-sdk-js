@@ -1030,6 +1030,18 @@ describe 'WeaverQuery Test', ->
       expect(nodes.length).to.equal(0)
     )
 
+  it 'should sanitize weaver query with simple quote on restrict', ->
+
+    a = new Weaver.Node('node_id')
+    a.set('name',"test")
+    a.save().then( ->
+      new Weaver.Query()
+      .restrict("'node_id'")
+      .find()
+    ).then((nodes)->
+      expect(nodes.length).to.equal(1)
+    )
+
   it 'should sanitize weaver query allow to search values with escapable character \'', ->
 
     a = new Weaver.Node()
