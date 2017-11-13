@@ -99272,7 +99272,7 @@ module.exports = yeast;
 },{}],392:[function(require,module,exports){
 module.exports={
   "name": "weaver-sdk",
-  "version": "3.0.14",
+  "version": "3.0.16-beta.0",
   "description": "Weaver SDK for JavaScript",
   "author": {
     "name": "Mohamad Alamili",
@@ -99280,8 +99280,8 @@ module.exports={
     "email": "mohamad@sysunite.com"
   },
   "com_weaverplatform": {
-    "requiredServerVersion": "^3.0.10",
-    "requiredConnectorVersion": "~0.0.27-SNAPSHOT-handling-better-errors"
+    "requiredServerVersion": "^3.0.11-beta.0",
+    "requiredConnectorVersion": "~0.0.24-SNAPSHOT-sanitize"
   },
   "main": "lib/Weaver.js",
   "license": "GPL-3.0",
@@ -99485,6 +99485,12 @@ module.exports={
       return this.POST("project.create", {
         id: id,
         name: name
+      });
+    };
+
+    CoreManager.prototype.shout = function(message) {
+      return this.POST("socket.shout", {
+        message: message
       });
     };
 
@@ -100030,13 +100036,15 @@ module.exports={
 
 },{"./Weaver":398,"cuid":125}],397:[function(require,module,exports){
 (function() {
-  var Promise, SocketController, io, pjson;
+  var Promise, SocketController, Weaver, io, pjson;
 
   io = require('socket.io-client');
 
   Promise = require('bluebird');
 
   pjson = require('../package.json');
+
+  Weaver = require('./Weaver');
 
   SocketController = (function() {
     function SocketController(address, options) {
@@ -100056,6 +100064,9 @@ module.exports={
       return new Promise((function(_this) {
         return function(resolve, reject) {
           _this.io = io.connect(_this.address, _this.options);
+          _this.io.on('socket.shout', function(msg) {
+            return Weaver.publish('socket.shout', msg);
+          });
           return _this.io.on('connect', function() {
             return resolve();
           }).on('connect_error', function() {
@@ -100104,7 +100115,7 @@ module.exports={
 
 }).call(this);
 
-},{"../package.json":392,"bluebird":74,"socket.io-client":327}],398:[function(require,module,exports){
+},{"../package.json":392,"./Weaver":398,"bluebird":74,"socket.io-client":327}],398:[function(require,module,exports){
 (function() {
   var Promise, PubSub, Weaver;
 
@@ -100238,6 +100249,14 @@ module.exports={
 
     Weaver.getCoreManager = function() {
       return this.getInstance().getCoreManager();
+    };
+
+    Weaver.shout = function(message) {
+      return this.getCoreManager().shout(message);
+    };
+
+    Weaver.sniff = function(callback) {
+      return Weaver.subscribe("socket.shout", callback);
     };
 
     Weaver.subscribe = PubSub.subscribe;
@@ -101762,6 +101781,39 @@ module.exports={
       })(this));
     };
 
+    WeaverNode.batchDestroy = function(array, project) {
+      var cm;
+      cm = Weaver.getCoreManager();
+      return cm.enqueue((function(_this) {
+        return function() {
+          var destroyOperations, error, node;
+          if ((array != null) && array.length !== 0) {
+            try {
+              destroyOperations = (function() {
+                var j, len, results;
+                results = [];
+                for (j = 0, len = array.length; j < len; j++) {
+                  node = array[j];
+                  results.push(Operation.Node(node).removeNode());
+                }
+                return results;
+              })();
+              return cm.executeOperations(destroyOperations, project).then(function() {
+                return Promise.resolve();
+              })["catch"](function(e) {
+                return Promise.reject(e);
+              });
+            } catch (error1) {
+              error = error1;
+              return Promise.reject(error);
+            }
+          } else {
+            return Promise.reject("Cannot batch destroy nodes without any node");
+          }
+        };
+      })(this));
+    };
+
     WeaverNode.prototype.setACL = function(acl) {};
 
     return WeaverNode;
@@ -101789,13 +101841,18 @@ module.exports={
       serverObject.functions.forEach((function(_this) {
         return function(f) {
           return _this[f.name] = function() {
-            var args, i, index, len, payload, r, ref;
+            var args, i, index, j, len, len1, payload, r, ref, ref1;
             args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
             payload = {};
             ref = f.require;
             for (index = i = 0, len = ref.length; i < len; index = ++i) {
               r = ref[index];
               payload[r] = args[index];
+            }
+            ref1 = f.optional;
+            for (index = j = 0, len1 = ref1.length; j < len1; index = ++j) {
+              r = ref1[index];
+              payload[r] = args[f.require.length + index];
             }
             return Weaver.getCoreManager().executePluginFunction(f.route, payload);
           };
@@ -101810,12 +101867,17 @@ module.exports={
     WeaverPlugin.prototype.printFunctions = function() {
       var f, i, len, prettyFunction, ref, results;
       prettyFunction = function(f) {
-        var args, i, len, r, ref;
+        var args, i, j, len, len1, r, ref, ref1;
         args = "";
         ref = f.require;
         for (i = 0, len = ref.length; i < len; i++) {
           r = ref[i];
           args += r + ",";
+        }
+        ref1 = f.optional;
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          r = ref1[j];
+          args += "[" + r + "],";
         }
         args = args.slice(0, -1);
         return f.name + "(" + args + ")";
