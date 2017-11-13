@@ -26,7 +26,11 @@ services:
     command: server /data
 
   weaver-server:
+<<<<<<< HEAD
     image: sysunite/weaver-server:3.0.10-beta.1
+=======
+    image: sysunite/weaver-server:3.0.11-beta.0
+>>>>>>> develop
     expose:
     - "9487"
     ports:

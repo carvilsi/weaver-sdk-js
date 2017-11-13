@@ -292,8 +292,23 @@ describe 'WeaverQuery Test', ->
       wipeCurrentProject().then( ->
         a.relation('link').add(b)
         b.relation('link').add(c)
+        b.relation('redundant').add(c)
         a.save()
       )
+
+    it 'should combine hasNoRelationOut seperate clauses correctly', ->
+      new Weaver.Query()
+      .hasNoRelationOut('link', Weaver.Node.get('b'))
+      .hasNoRelationOut('redundant', Weaver.Node.get('c'))
+      .find().then((nodes) ->
+        expect(nodes).to.have.length.be(1)
+        checkNodeInResult(nodes, 'c')
+      )
+
+    it 'should combine hasNoRelationOut combined clauses correctly', ->
+      expect(new Weaver.Query()
+        .hasNoRelationOut('link', 'b', 'c')
+        .find()).to.eventually.have.length.be(1)
 
     it 'should be able to do nested queries (to allow hops)', ->
       new Weaver.Query()
